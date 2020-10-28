@@ -1,0 +1,14 @@
+/Users/shenlong/Documents/flink-master/flink-walkthroughs/flink-walkthrough-common/src/main/java/org/apache/flink/walkthrough/common/MapJob.java
+/Users/shenlong/Documents/flink-master/flink-walkthroughs/flink-walkthrough-common/src/main/java/org/apache/flink/walkthrough/common/entity/Alert.java
+/Users/shenlong/Documents/flink-master/flink-walkthroughs/flink-walkthrough-common/src/main/java/org/apache/flink/walkthrough/common/FraudDetectionJob.java
+/Users/shenlong/Documents/flink-master/flink-walkthroughs/flink-walkthrough-common/src/main/java/org/apache/flink/walkthrough/common/CountWindowAverage.java
+/Users/shenlong/Documents/flink-master/flink-walkthroughs/flink-walkthrough-common/src/main/java/org/apache/flink/walkthrough/common/CountWindowJob.java
+/Users/shenlong/Documents/flink-master/flink-walkthroughs/flink-walkthrough-common/src/main/java/org/apache/flink/walkthrough/common/ControlFunction.java
+/Users/shenlong/Documents/flink-master/flink-walkthroughs/flink-walkthrough-common/src/main/java/org/apache/flink/walkthrough/common/sink/LoggerOutputFormat.java
+/Users/shenlong/Documents/flink-master/flink-walkthroughs/flink-walkthrough-common/src/main/java/org/apache/flink/walkthrough/common/sink/AlertSink.java
+/Users/shenlong/Documents/flink-master/flink-walkthroughs/flink-walkthrough-common/src/main/java/org/apache/flink/walkthrough/common/source/TransactionRowInputFormat.java
+/Users/shenlong/Documents/flink-master/flink-walkthroughs/flink-walkthrough-common/src/main/java/org/apache/flink/walkthrough/common/source/TransactionSource.java
+/Users/shenlong/Documents/flink-master/flink-walkthroughs/flink-walkthrough-common/src/main/java/org/apache/flink/walkthrough/common/ConnectedStreamJob.java
+/Users/shenlong/Documents/flink-master/flink-walkthroughs/flink-walkthrough-common/src/main/java/org/apache/flink/walkthrough/common/FraudDetector.java
+/Users/shenlong/Documents/flink-master/flink-walkthroughs/flink-walkthrough-common/src/main/java/org/apache/flink/walkthrough/common/source/TransactionIterator.java
+/Users/shenlong/Documents/flink-master/flink-walkthroughs/flink-walkthrough-common/src/main/java/org/apache/flink/walkthrough/common/entity/Transaction.java
