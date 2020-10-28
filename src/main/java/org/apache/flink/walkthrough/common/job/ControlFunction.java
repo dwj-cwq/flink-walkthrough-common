@@ -21,7 +21,6 @@ public class ControlFunction extends RichCoFlatMapFunction<String, String, Strin
 	@Override
 	public void flatMap1(String control_value, Collector<String> out) throws Exception {
 		blocked.update(Boolean.TRUE);
-
 	}
 
 	@Override
