@@ -1,15 +1,16 @@
 package org.apache.flink.walkthrough.common.job;
 
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
-import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
-import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
 import org.apache.flink.walkthrough.common.entity.SensorEvent;
+
+import java.time.Duration;
 
 /**
  * @author zhang lianhui
@@ -32,13 +33,7 @@ public class SideOutputJob {
 					Double temperature = Double.parseDouble(items[2]);
 					return new SensorEvent(id, timestamp, temperature);
 				})
-				.assignTimestampsAndWatermarks(new BoundedOutOfOrdernessTimestampExtractor<SensorEvent>(
-						Time.seconds(1)) {
-					@Override
-					public long extractTimestamp(SensorEvent sensorEvent) {
-						return sensorEvent.getTimestamp();
-					}
-				});
+				.assignTimestampsAndWatermarks(WatermarkStrategy.<SensorEvent>forBoundedOutOfOrderness(Duration.ofSeconds(3)).withIdleness(Duration.ofMinutes(1)));
 
 		final SingleOutputStreamOperator<SensorEvent> processStream = dataStream.process(new FreezingAlert());
 
