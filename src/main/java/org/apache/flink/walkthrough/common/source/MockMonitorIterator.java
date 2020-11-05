@@ -3,6 +3,7 @@ package org.apache.flink.walkthrough.common.source;
 import org.apache.flink.api.common.time.Time;
 import org.apache.flink.walkthrough.common.entity.Record;
 import org.apache.flink.walkthrough.common.entity.RecordImp;
+import org.apache.flink.walkthrough.common.entity.RecordType;
 
 import java.io.Serializable;
 import java.util.Iterator;
@@ -33,7 +34,7 @@ public class MockMonitorIterator implements Iterator<Record>, Serializable {
 
 	@Override
 	public Record next() {
-		final RecordImp recordImp = new RecordImp(id, timestamp, random.nextDouble()*10);
+		final RecordImp recordImp = new RecordImp(id, timestamp, random.nextDouble()*10, RecordType.MONITOR);
 		timestamp += interval.toMilliseconds();
 		try {
 			Thread.sleep(interval.toMilliseconds());

@@ -12,6 +12,7 @@ import org.apache.flink.util.Collector;
 import org.apache.flink.walkthrough.common.entity.Monitor;
 import org.apache.flink.walkthrough.common.entity.Record;
 import org.apache.flink.walkthrough.common.entity.RecordImp;
+import org.apache.flink.walkthrough.common.entity.RecordType;
 import org.apache.flink.walkthrough.common.entity.SimpleMonitor;
 
 import java.util.List;
@@ -46,7 +47,7 @@ public class EngineJobTest {
 								out.collect(new RecordImp(
 										element.getMonitorId(),
 										System.currentTimeMillis(),
-										10.0));
+										10.0, RecordType.MONITOR));
 							}
 						}
 					}

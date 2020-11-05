@@ -20,7 +20,10 @@ import java.util.concurrent.TimeUnit;
 public class TimeUtil {
 	public static final String DEFAULT_TS_PATTERN = "yyyy-MM-dd HH:mm:ss.SSS Z";
 
-	public static long parseTimeWithFormat(String time, String format, int unit) throws ParseException {
+	public static long parseTimeWithFormat(
+			String time,
+			String format,
+			int unit) throws ParseException {
 		if (unit <= 0) {
 			return 0L;
 		}
@@ -31,7 +34,10 @@ public class TimeUtil {
 		return new SimpleDateFormat(format).parse(time).getTime();
 	}
 
-	private static long parseTimeWithFormat(String time, String format, String timezone) throws ParseException {
+	private static long parseTimeWithFormat(
+			String time,
+			String format,
+			String timezone) throws ParseException {
 		SimpleDateFormat sdf = new SimpleDateFormat(format);
 		sdf.setTimeZone(TimeZone.getTimeZone(timezone));
 		return sdf.parse(time).getTime() / 1000;
@@ -95,9 +101,15 @@ public class TimeUtil {
 		return LocalDateTime.now(ZoneId.systemDefault());
 	}
 
+	public static String epochMilliFormat(long epochMillis) {
+		return epochMilliFormat(epochMillis, DEFAULT_TS_PATTERN);
+	}
+
 	public static String epochMilliFormat(long epochMillis, String pattern) {
-		return format(ZonedDateTime.ofInstant(Instant.ofEpochMilli(epochMillis),
-				ZoneId.systemDefault()),
+		return format(
+				ZonedDateTime.ofInstant(
+						Instant.ofEpochMilli(epochMillis),
+						ZoneId.systemDefault()),
 				DateTimeFormatter.ofPattern(pattern == null ? DEFAULT_TS_PATTERN : pattern));
 	}
 
