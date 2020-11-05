@@ -1,9 +1,9 @@
 package org.apache.flink.walkthrough.common.entity;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.base.Strings;
 
-import org.apache.flink.mesos.shaded.com.fasterxml.jackson.annotation.JsonValue;
 import org.apache.flink.walkthrough.common.util.CommonEnum;
 
 /**

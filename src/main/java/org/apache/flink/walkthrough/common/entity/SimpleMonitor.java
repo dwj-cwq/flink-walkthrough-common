@@ -7,15 +7,32 @@ package org.apache.flink.walkthrough.common.entity;
 public class SimpleMonitor implements Monitor {
 	private String monitorId;
 	private String cronExpression;
+	private Long delta;
 
-	public SimpleMonitor(String monitorId, String cronExpression) {
+	public SimpleMonitor() {
+
+	}
+
+	public SimpleMonitor(String monitorId, String cronExpression, Long delta) {
 		this.monitorId = monitorId;
 		this.cronExpression = cronExpression;
+		this.delta = delta;
 	}
 
 	@Override
 	public String getMonitorId() {
 		return this.monitorId;
+	}
+
+
+	@Override
+	public Long getDelta() {
+		return this.delta;
+	}
+
+	@Override
+	public String getCronExpression() {
+		return this.cronExpression;
 	}
 
 	public void setMonitorId(String monitorId) {
@@ -26,9 +43,8 @@ public class SimpleMonitor implements Monitor {
 		this.cronExpression = cronExpression;
 	}
 
-	@Override
-	public String getCronExpression() {
-		return this.cronExpression;
+	public void setDelta(Long delta) {
+		this.delta = delta;
 	}
 
 

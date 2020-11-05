@@ -22,7 +22,6 @@ public class RecordImp implements Record {
 
 	private Long timestamp;
 	private Double value;
-	private RecordType recordType = RecordType.REAL_RECORD;
 
 	public static final String DEFAULT_TS_PATTERN = "yyyy-MM-dd HH:mm:ss.SSS Z";
 
@@ -34,7 +33,6 @@ public class RecordImp implements Record {
 				"monitorId='" + monitorId + '\'' +
 				", timestamp=" + tv +
 				", value=" + value +
-				", recordType=" + recordType +
 				'}';
 	}
 }

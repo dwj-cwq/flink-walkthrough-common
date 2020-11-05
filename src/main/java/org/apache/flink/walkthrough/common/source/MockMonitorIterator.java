@@ -34,7 +34,7 @@ public class MockMonitorIterator implements Iterator<Record>, Serializable {
 
 	@Override
 	public Record next() {
-		final RecordImp recordImp = new RecordImp(id, timestamp, random.nextDouble()*10, RecordType.MONITOR);
+		final RecordImp recordImp = new RecordImp(id, timestamp, random.nextDouble()*10);
 		timestamp += interval.toMilliseconds();
 		try {
 			Thread.sleep(interval.toMilliseconds());

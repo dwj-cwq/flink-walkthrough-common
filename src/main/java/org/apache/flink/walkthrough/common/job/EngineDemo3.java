@@ -2,7 +2,14 @@ package org.apache.flink.walkthrough.common.job;
 
 import lombok.extern.slf4j.Slf4j;
 
+import org.apache.commons.compress.utils.Lists;
+
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
+import org.apache.flink.api.common.state.MapState;
+import org.apache.flink.api.common.state.MapStateDescriptor;
+import org.apache.flink.api.common.state.StateTtlConfig;
+import org.apache.flink.api.common.time.Time;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.TimeCharacteristic;
@@ -10,27 +17,20 @@ import org.apache.flink.streaming.api.datastream.ConnectedStreams;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.co.CoProcessFunction;
 import org.apache.flink.streaming.api.functions.co.KeyedCoProcessFunction;
-import org.apache.flink.streaming.api.functions.co.RichCoFlatMapFunction;
-import org.apache.flink.streaming.api.functions.windowing.ProcessAllWindowFunction;
-import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
-import org.apache.flink.streaming.api.windowing.assigners.GlobalWindows;
-import org.apache.flink.streaming.api.windowing.evictors.Evictor;
-import org.apache.flink.streaming.api.windowing.triggers.Trigger;
-import org.apache.flink.streaming.api.windowing.triggers.TriggerResult;
-import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
-import org.apache.flink.streaming.runtime.operators.windowing.TimestampedValue;
 import org.apache.flink.util.Collector;
 import org.apache.flink.walkthrough.common.entity.Record;
-import org.apache.flink.walkthrough.common.entity.RecordType;
+import org.apache.flink.walkthrough.common.entity.Rule;
 import org.apache.flink.walkthrough.common.functionImp.MapToRecord;
 import org.apache.flink.walkthrough.common.functionImp.MedianFinder;
 import org.apache.flink.walkthrough.common.source.MonitorSource;
 import org.apache.flink.walkthrough.common.util.TimeUtil;
-import org.apache.flink.walkthrough.common.watermarkImp.EngineWatermarkImp;
+import org.apache.flink.walkthrough.common.util.Util;
 
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -85,118 +85,91 @@ public class EngineDemo3 {
 		final DataStream<Record> recordsStream = kafkaSource.map(new MapToRecord());
 
 		// monitor source
-		final DataStream<Record> monitorStream = env.addSource(new MonitorSource());
+		final DataStream<Rule> ruleStream = env.addSource(new MonitorSource());
 
 		// 生成水印
-		final DataStream<Record> control = monitorStream.assignTimestampsAndWatermarks(
-				new EngineWatermarkImp().withTimestampAssigner((r, t) -> r.getTimestamp()));
 
 		// 流合并
-		final ConnectedStreams<Record, Record> connect = control.connect(recordsStream);
+		final ConnectedStreams<Rule, Record> connect = ruleStream.connect(recordsStream);
 
 		// key by monitor id
-		final DataStream<Double> process = connect
-				.keyBy(Record::getMonitorId, Record::getMonitorId)
-				.process(new KeyedCoProcessFunction<String, Record, Record, Record>() {
-					@Override
-					public void open(Configuration parameters) throws Exception {
-						super.open(parameters);
-					}
-
-					@Override
-					public void onTimer(
-							long timestamp,
-							OnTimerContext ctx,
-							Collector<Record> out) throws Exception {
-						super.onTimer(timestamp, ctx, out);
-					}
+		final DataStream<Tuple2<String, Double>> process = connect
+				.keyBy(Rule::getMonitorId, Record::getMonitorId)
+				.process(new KeyedCoProcessFunction<String, Rule, Record, Tuple2<String, Double>>() {
+					MapState<String, Record> cachedRecord;
 
 					@Override
 					public void processElement1(
-							Record value,
+							Rule rule,
 							Context ctx,
-							Collector<Record> out) throws Exception {
+							Collector<Tuple2<String, Double>> out) throws Exception {
+						log.info("控制流: " + rule + " 进入");
+						if (!cachedRecord.isEmpty()) {
+							final Iterable<Map.Entry<String, Record>> entries = cachedRecord.entries();
+							final long cutOff = rule.getCutOffTimestamp();
+							MedianFinder medianFinder = new MedianFinder();
+							for (Iterator<Map.Entry<String, Record>> entryIterator = entries.iterator(); entryIterator
+									.hasNext(); ) {
+								final Map.Entry<String, Record> curr = entryIterator.next();
+								final Record value = curr.getValue();
+								if (value.getTimestamp() < cutOff) {
+									log.info("remove: " + value + ", cut off timestamp: " + TimeUtil
+											.epochMilliFormat(cutOff));
+									entryIterator.remove();
+								} else {
+									medianFinder.addNum(value.getValue());
+								}
+							}
+							// 输出中位数
+							if (medianFinder.size() > 0) {
+								final double median = medianFinder.getMedian();
+								List<Double> records = Lists.newArrayList();
+								cachedRecord.values().forEach(r -> records.add(r.getValue()));
+								records.sort(Double::compareTo);
+								log.info(String.format(
+										"current key: %s, media size: %d, media value: %s, records: %s",
+										rule.getMonitorId(),
+										medianFinder.size(),
+										median,
+										records));
+								out.collect(Tuple2.of(rule.getMonitorId(), median));
+							}
+						}
+					}
+
+					@Override
+					public void open(Configuration parameters) throws Exception {
+						super.open(parameters);
+						MapStateDescriptor<String, Record> mapStateDescriptor = new MapStateDescriptor<String, Record>(
+								"cached_record",
+								String.class,
+								Record.class);
+						StateTtlConfig ttl = StateTtlConfig
+								// 设置有效期为 30 分钟
+								.newBuilder(Time.minutes(30))
+								// 设置有效期更新规则，这里设置为当创建和写入时，都重置其有效期
+								.setUpdateType(StateTtlConfig.UpdateType.OnCreateAndWrite)
+								.setStateVisibility(StateTtlConfig.StateVisibility.NeverReturnExpired)
+								.build();
+						mapStateDescriptor.enableTimeToLive(ttl);
+						cachedRecord = getRuntimeContext().getMapState(mapStateDescriptor);
 					}
 
 					@Override
 					public void processElement2(
 							Record value,
 							Context ctx,
-							Collector<Record> out) throws Exception {
-
-					}
-				})
-				.keyBy(Record::getMonitorId)
-				.window(GlobalWindows.create())
-				.trigger(new Trigger<Record, GlobalWindow>() {
-					// TODO: 2020/11/2 后续会根据需求进行调整
-					@Override
-					public TriggerResult onElement(
-							Record element,
-							long timestamp,
-							GlobalWindow window,
-							TriggerContext ctx) throws Exception {
-						if (element.getRecordType() == RecordType.MONITOR) {
-							System.out.println("当前 Monitor：" + element);
-							return TriggerResult.FIRE;
+							Collector<Tuple2<String, Double>> out) throws Exception {
+						if (value.getValue() != null && value.getTimestamp() != null) {
+							cachedRecord.put(Util.getUuid(), value);
 						}
-						return TriggerResult.CONTINUE;
-					}
 
-					@Override
-					public TriggerResult onProcessingTime(
-							long time,
-							GlobalWindow window,
-							TriggerContext ctx) throws Exception {
-						return TriggerResult.CONTINUE;
-					}
-
-					// TODO: 2020/11/2 设置窗口触发条件
-					@Override
-					public TriggerResult onEventTime(
-							long time,
-							GlobalWindow window,
-							TriggerContext ctx) throws Exception {
-						return TriggerResult.CONTINUE;
-					}
-
-					// TODO: 2020/11/2 clear window etc
-					@Override
-					public void clear(GlobalWindow window, TriggerContext ctx) throws Exception {
-
-					}
-				})
-				.process(new ProcessWindowFunction<Record, Double, String, GlobalWindow>() {
-					@Override
-					public void process(
-							String key,
-							Context context,
-							Iterable<Record> elements,
-							Collector<Double> out) throws Exception {
-						log.info("current window max ts:" + TimeUtil.epochMilliFormat(context
-								.window()
-								.maxTimestamp()));
-						log.info("current watermark: "
-								+ TimeUtil.epochMilliFormat(context.currentWatermark())
-								+ ", processing time: "
-								+ TimeUtil.epochMilliFormat(context.currentProcessingTime()));
-						// 执行中位数计算
-						final MedianFinder medianFinder = new MedianFinder();
-						for (Record record : elements) {
-							if (record.getValue() != null) {
-								medianFinder.addNum(record.getValue());
-							}
-						}
-						log.info(
-								"key:" + key + " ,heap size: " + medianFinder.size() + ", median: "
-										+ medianFinder.getMedian());
-						// 输出中位数
-						out.collect(medianFinder.getMedian());
 					}
 				});
 
+
 		// sink operator
-		process.printToErr("sink:");
+		process.printToErr("sink");
 
 		// 执行任务
 		env.execute("engine job demo");

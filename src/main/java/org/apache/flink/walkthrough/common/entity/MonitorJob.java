@@ -21,13 +21,15 @@ public class MonitorJob implements Job {
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		final JobDetail jobDetail = context.getJobDetail();
-		final LinkedBlockingDeque<Record> deque = (LinkedBlockingDeque<Record>) jobDetail
+		final LinkedBlockingDeque<Rule> deque = (LinkedBlockingDeque<Rule>) jobDetail
 				.getJobDataMap()
 				.get(JobUtil.QUEUE);
-		deque.addLast(new RecordImp(
-				jobDetail.getKey().getName(),
-				System.currentTimeMillis(),
-				null, RecordType.MONITOR));
+		final Monitor monitor = (Monitor) jobDetail.getJobDataMap().get(JobUtil.MONITOR);
+		deque.addLast(new Rule(
+				monitor.getMonitorId(),
+				monitor.getCronExpression(),
+				monitor.getDelta(),
+				System.currentTimeMillis()));
 		log.info("deque size: " + deque.size());
 	}
 }

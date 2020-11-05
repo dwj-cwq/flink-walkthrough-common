@@ -12,7 +12,6 @@ import org.apache.flink.util.Collector;
 import org.apache.flink.walkthrough.common.entity.Monitor;
 import org.apache.flink.walkthrough.common.entity.Record;
 import org.apache.flink.walkthrough.common.entity.RecordImp;
-import org.apache.flink.walkthrough.common.entity.RecordType;
 import org.apache.flink.walkthrough.common.entity.SimpleMonitor;
 
 import java.util.List;
@@ -28,8 +27,8 @@ public class EngineJobTest {
 		env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
 		List<Monitor> monitors = Lists.newArrayList(
-				new SimpleMonitor("monitor_a", "0 0/1 * * * ? *"),
-				new SimpleMonitor("monitor_b", "0/10 * * * * ? "));
+				new SimpleMonitor("monitor_a", "0 0/1 * * * ? *", 60 * 1000L),
+				new SimpleMonitor("monitor_b", "0/10 * * * * ? ", 20 * 1000L));
 		final DataStreamSource<Monitor> monitorSource = env.fromCollection(monitors);
 		final DataStream<Record> processStream = monitorSource
 				.keyBy(Monitor::getMonitorId)
@@ -47,7 +46,7 @@ public class EngineJobTest {
 								out.collect(new RecordImp(
 										element.getMonitorId(),
 										System.currentTimeMillis(),
-										10.0, RecordType.MONITOR));
+										10.0));
 							}
 						}
 					}

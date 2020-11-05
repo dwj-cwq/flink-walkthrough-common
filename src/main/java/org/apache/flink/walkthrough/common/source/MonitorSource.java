@@ -2,7 +2,7 @@ package org.apache.flink.walkthrough.common.source;
 
 import org.apache.flink.annotation.Public;
 import org.apache.flink.streaming.api.functions.source.FromIteratorFunction;
-import org.apache.flink.walkthrough.common.entity.Record;
+import org.apache.flink.walkthrough.common.entity.Rule;
 
 import java.io.Serializable;
 
@@ -11,7 +11,7 @@ import java.io.Serializable;
  * @date 2020/10/30 4:13 下午
  */
 @Public
-public class MonitorSource extends FromIteratorFunction<Record> implements Serializable {
+public class MonitorSource extends FromIteratorFunction<Rule> implements Serializable {
 	private static final long serialVersionUID = -6560586535485671809L;
 
 	public MonitorSource() {

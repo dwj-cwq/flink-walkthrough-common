@@ -3,11 +3,12 @@ package org.apache.flink.walkthrough.common.util;
 import org.apache.flink.walkthrough.common.entity.Monitor;
 import org.apache.flink.walkthrough.common.entity.MonitorJob;
 
-import org.apache.flink.walkthrough.common.entity.Record;
+import org.apache.flink.walkthrough.common.entity.Rule;
 
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
 import org.quartz.JobBuilder;
+import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.ScheduleBuilder;
@@ -27,6 +28,7 @@ public class JobUtil {
 	private static volatile Scheduler scheduler;
 	private static final String DEFAULT_GROUP = "monitor";
 	public static final String QUEUE = "queue";
+	public static final String MONITOR = "monitor";
 
 	static {
 		try {
@@ -45,11 +47,13 @@ public class JobUtil {
 
 	public static String createJob(
 			Monitor monitor,
-			LinkedBlockingDeque<Record> deque) throws SchedulerException {
+			LinkedBlockingDeque<Rule> deque) throws SchedulerException {
 		final String monitorId = monitor.getMonitorId();
 		JobKey jobKey = new JobKey(monitorId, DEFAULT_GROUP);
 		JobDetail jobDetail = JobBuilder.newJob(MonitorJob.class).withIdentity(jobKey).build();
-		jobDetail.getJobDataMap().put(QUEUE, deque);
+		final JobDataMap jobDataMap = jobDetail.getJobDataMap();
+		jobDataMap.put(QUEUE, deque);
+		jobDataMap.put(MONITOR, monitor);
 		final Trigger trigger = TriggerBuilder.newTrigger()
 				.withIdentity(monitorId, DEFAULT_GROUP)
 				.withSchedule(cron(monitor.getCronExpression()))

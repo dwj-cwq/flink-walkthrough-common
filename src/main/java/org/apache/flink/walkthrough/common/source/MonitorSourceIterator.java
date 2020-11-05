@@ -1,7 +1,7 @@
 package org.apache.flink.walkthrough.common.source;
 
 import org.apache.flink.walkthrough.common.entity.Monitor;
-import org.apache.flink.walkthrough.common.entity.Record;
+import org.apache.flink.walkthrough.common.entity.Rule;
 import org.apache.flink.walkthrough.common.entity.SimpleMonitor;
 import org.apache.flink.walkthrough.common.util.JobUtil;
 
@@ -17,9 +17,9 @@ import java.util.concurrent.LinkedBlockingDeque;
  * @author zhang lianhui
  * @date 2020/10/30 11:06 上午
  */
-public class MonitorSourceIterator implements Iterator<Record>, Serializable {
+public class MonitorSourceIterator implements Iterator<Rule>, Serializable {
 	private static final long serialVersionUID = 8381054071358505226L;
-	private static LinkedBlockingDeque<Record> linkedBlockingDeque = new LinkedBlockingDeque<>(
+	private static LinkedBlockingDeque<Rule> linkedBlockingDeque = new LinkedBlockingDeque<>(
 			1000 * 1000);
 
 	@Override
@@ -28,7 +28,7 @@ public class MonitorSourceIterator implements Iterator<Record>, Serializable {
 	}
 
 	@Override
-	public Record next() {
+	public Rule next() {
 		for (; ; ) {
 			if (!linkedBlockingDeque.isEmpty()) {
 				return linkedBlockingDeque.pollFirst();
@@ -55,8 +55,8 @@ public class MonitorSourceIterator implements Iterator<Record>, Serializable {
 
 	private static List<Monitor> findAllMonitors() {
 		List<Monitor> monitors = new ArrayList<>();
-		monitors.add(new SimpleMonitor("monitor_a", "0/20 * * * * ? "));
-		monitors.add(new SimpleMonitor("monitor_b", "0 0/1 * * * ? "));
+		monitors.add(new SimpleMonitor("monitor_a", "0/20 * * * * ? ", 60 * 1000L));
+		monitors.add(new SimpleMonitor("monitor_b", "0 0/1 * * * ? ", 10 * 1000L));
 		return monitors;
 	}
 //

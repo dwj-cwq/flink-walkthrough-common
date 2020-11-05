@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -126,10 +127,16 @@ public class Util {
 		return System.getProperty("java.io.tmpdir");
 	}
 
-	public static <T, U> List<U> mapTo(List<T> typesStr, Function<? super T, ? extends U> converter) {
+	public static <T, U> List<U> mapTo(
+			List<T> typesStr,
+			Function<? super T, ? extends U> converter) {
 		List<U> results = Collections.emptyList();
 		if (typesStr != null) {
-			results = typesStr.stream().map(converter).filter(Objects::nonNull).collect(Collectors.toList());
+			results = typesStr
+					.stream()
+					.map(converter)
+					.filter(Objects::nonNull)
+					.collect(Collectors.toList());
 		}
 		return results;
 	}
@@ -141,5 +148,9 @@ public class Util {
 			return "";
 		}
 		return matcher.group(1);
+	}
+
+	public static String getUuid() {
+		return UUID.randomUUID().toString();
 	}
 }

@@ -8,5 +8,4 @@ public interface Record {
 	String getMonitorId();
 	Long getTimestamp();
 	Double getValue();
-	RecordType getRecordType();
 }

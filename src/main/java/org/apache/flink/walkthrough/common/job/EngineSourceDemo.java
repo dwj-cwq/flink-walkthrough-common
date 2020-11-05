@@ -3,7 +3,7 @@ package org.apache.flink.walkthrough.common.job;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.walkthrough.common.entity.Record;
+import org.apache.flink.walkthrough.common.entity.Rule;
 import org.apache.flink.walkthrough.common.source.MonitorSource;
 
 /**
@@ -16,7 +16,7 @@ public class EngineSourceDemo {
 		env.setParallelism(1);
 		env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
-		final DataStream<Record> streamSource = env.addSource(new MonitorSource());
+		final DataStream<Rule> streamSource = env.addSource(new MonitorSource());
 
 		streamSource.printToErr();
 		env.execute("monitor source");
