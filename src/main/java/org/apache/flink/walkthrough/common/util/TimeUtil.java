@@ -117,6 +117,9 @@ public class TimeUtil {
 		return dateTimeFormatter.format(date);
 	}
 
+	/**
+	 * @return 墙上时钟
+	 */
 	public static long currentMilliSeconds() {
 		return System.currentTimeMillis();
 	}
@@ -128,5 +131,12 @@ public class TimeUtil {
 
 	public static long truncatedToDays(long time) {
 		return time - (time % TimeUnit.DAYS.toMillis(1));
+	}
+
+	/**
+	 * @return 单调时钟
+	 */
+	public static long hiResClockMs() {
+		return System.nanoTime() / 1_000_000;
 	}
 }
