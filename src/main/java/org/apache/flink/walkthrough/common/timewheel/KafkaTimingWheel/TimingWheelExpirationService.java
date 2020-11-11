@@ -5,7 +5,7 @@ package org.apache.flink.walkthrough.common.timewheel.KafkaTimingWheel;
  * @date 2020/11/10 4:42 下午
  */
 public class TimingWheelExpirationService {
-	private Timer timer;
+	private final Timer timer;
 	private ExpiredOperationReaper reaper;
 
 	public TimingWheelExpirationService(Timer timer) {

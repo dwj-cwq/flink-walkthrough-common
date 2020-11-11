@@ -34,6 +34,8 @@ import static org.apache.flink.walkthrough.common.timewheel.KafkaTimingWheel.Tim
  * 2）采用 DelayQueue 做时间的推进：
  * a. 获取队列 head 的元素只需要 O(1) 的时间复杂度
  * b. 以少量空间换时间， 延迟队列的内部实现采用了优先级队列（最小堆）
+ * <p>
+ * http://dockone.io/article/10351
  *
  * @author kafka
  * @date 2020/11/9 3:58 下午
@@ -138,6 +140,9 @@ public class SystemTimer extends Timer {
 		}
 	}
 
+	/**
+	 * @param taskEntry 将单个 TimerTaskEntry 添加到时间轮中，如果该任务过期则执行；若取消，则什么也不做
+	 */
 	private void addTimerTaskEntry(TimerTaskEntry taskEntry) {
 		if (taskEntry != null) {
 			if (!timingWheel.add(taskEntry)) {
@@ -149,18 +154,18 @@ public class SystemTimer extends Timer {
 		}
 	}
 
-	private void reInsert(TimerTaskEntry taskEntry) {
-		addTimerTaskEntry(taskEntry);
-	}
-
 	/**
 	 * Advances the clock if there is an expired bucket. If there isn't any expired bucket when called,
 	 * waits up to timeoutMs before giving up.
+	 * 驱动时间轮前进并处理过期的槽，遍历单个槽内所有的 TimerTaskEntry 重新插入到时间轮中
 	 */
 	@Override
 	public boolean advanceClock(long timeoutMs) {
 		TimerTaskList bucket = null;
 		try {
+			/**
+			 * 从延迟队列获取任务槽
+			 */
 			bucket = delayQueue.poll(timeoutMs, TimeUnit.MILLISECONDS);
 		} catch (InterruptedException ex) {
 			log.error("advance task error {}", ex.getMessage(), ex);
@@ -170,9 +175,18 @@ public class SystemTimer extends Timer {
 			writeLock.lock();
 			try {
 				while (bucket != null) {
-					// log.info("timing wheel advance clock: {}", bucket.getExpiration());
+					/**
+					 * 更新每层时间轮的 curren tTime
+					 */
 					timingWheel.advanceClock(bucket.getExpiration());
-					bucket.flush(this::reInsert);
+
+					/**
+					 * 关键代码，高层时间轮降级到低层时间轮
+					 */
+					bucket.flush(this::addTimerTaskEntry);
+					/**
+					 * 获取下一个槽
+					 */
 					bucket = delayQueue.poll();
 				}
 			} finally {

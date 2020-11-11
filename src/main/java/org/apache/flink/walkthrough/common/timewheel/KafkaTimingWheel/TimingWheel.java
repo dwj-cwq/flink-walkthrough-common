@@ -12,24 +12,66 @@ import static org.apache.flink.walkthrough.common.timewheel.KafkaTimingWheel.Tim
 /**
  * Hierarchical Timing Wheels
  * https://www.confluent.io/blog/apache-kafka-purgatory-hierarchical-timing-wheels/
+ * https://juejin.im/entry/6844903616671662088
+ * https://www.mdeditor.tw/pl/pDvD
+ *
+ * TimingWheel is not thread safe
+ * 时间轮层级越低，时间精度越高；时间轮层级越高，时间精度越高
+ * <p>
+ * 若第一层 时间轮 tickMs = 1ms， wheelSize = 60，并且有七层时间轮： 则可以表示
+ * (60**7)/1000/60/60/24/365 = 88.76年
+ *
+ * DelayQueue 的引入是为了解决"空推进" 的问题
+ *
  * @author kafka
  * @date 2020/11/9 1:00 下午
  */
 @Slf4j
 public class TimingWheel {
+	/**
+	 * 时间槽的单位时间
+	 */
 	private final long tickMs;
+
+	/**
+	 * 时间轮的大小
+	 */
 	private final int wheelSize;
+
+	/**
+	 * 时间轮的启动时间，单调时钟时间，单位 Ms
+	 */
 	private final long startMs;
+
+	/**
+	 * 任务数量，即所有桶的节点数量之和
+	 */
 	private final AtomicInteger taskCounter;
 
+	/**
+	 * timer 与 所有时间轮共享的一个延迟队列
+	 */
 	private final DelayQueue<TimerTaskList> queue;
 
+	/**
+	 * 此层时间轮的跨度
+	 */
 	private final long interval;
+
+	/**
+	 * 此层时间轮的槽/桶
+	 */
 	private final List<TimerTaskList> buckets;
+
+	/**
+	 * 时间轮的时间指针
+	 */
 	private long currentTime;
+
 	/**
 	 * overflowWheel can potentially be updated and read by two concurrent threads through add().
 	 * Therefore, it needs to be volatile due to the issue of Double-Checked Locking pattern with JVM
+	 * 上一层时间轮、父级时间轮，使用 volatile 限制指令重排序
 	 */
 	private volatile TimingWheel overflowWheel;
 
@@ -54,6 +96,9 @@ public class TimingWheel {
 		this.currentTime = startMs - (startMs % tickMs);
 	}
 
+	/**
+	 * 创建父级时间轮
+	 */
 	private synchronized void addOverflowWheel() {
 		if (overflowWheel == null) {
 			overflowWheel = new TimingWheel(interval, wheelSize, currentTime, taskCounter, queue);
@@ -61,20 +106,27 @@ public class TimingWheel {
 		}
 	}
 
+	/**
+	 * 添加任务到时间轮： 若添加成功则返回 true，否则返回 false
+	 *
+	 * @param taskEntry 单个任务
+	 *
+	 * @return
+	 */
 	public boolean add(TimerTaskEntry taskEntry) {
 		long expirationMs = taskEntry.getExpirationMs();
 		if (taskEntry.cancelled()) {
-			// cancelled
+			// 任务被取消
 			return false;
 		}
 
 		if (expirationMs < currentTime + tickMs) {
-			// already expired
+			// 任务已经过期
 			return false;
 		}
 
 		if (expirationMs < currentTime + interval) {
-			// put in its own buckets
+			// 添加任务到自己的任务槽当中
 			long virtualId = expirationMs / tickMs;
 			final TimerTaskList bucket = buckets.get((int) (virtualId % wheelSize));
 			bucket.add(taskEntry);
@@ -92,11 +144,32 @@ public class TimingWheel {
 			return true;
 		}
 
-		// out of the interval, put it into the parent timer
+		// 超出本层时间轮间隔，添加任务到父级时间轮中
 		if (overflowWheel == null) {
 			addOverflowWheel();
 		}
 		return overflowWheel.add(taskEntry);
+	}
+
+	/**
+	 * 驱动时间轮前进， 更新时间轮的 currentTime
+	 *
+	 * @param timeMs try to advance the clock
+	 */
+	public void advanceClock(long timeMs) {
+		if (timeMs >= currentTime + tickMs) {
+			/**
+			 * 更新时间轮的 currentTime
+			 */
+			currentTime = timeMs - (timeMs % tickMs);
+			//	log.info("advance the clock: {}, tickMs: {}", currentTime, tickMs);
+			/**
+			 *  如果父级时间轮存在，则更新父级时间轮的 currentTime
+			 */
+			if (overflowWheel != null) {
+				overflowWheel.advanceClock(currentTime);
+			}
+		}
 	}
 
 	@Override
@@ -109,21 +182,5 @@ public class TimingWheel {
 				", interval=" + interval +
 				", currentTime=" + currentTime +
 				'}';
-	}
-
-	/**
-	 * 驱动时间轮前进
-	 *
-	 * @param timeMs try to advance the clock
-	 */
-	public void advanceClock(long timeMs) {
-		if (timeMs >= currentTime + tickMs) {
-			currentTime = timeMs - (timeMs % tickMs);
-			//	log.info("advance the clock: {}, tickMs: {}", currentTime, tickMs);
-			// try to advance the clock of the overflow wheel if present
-			if (overflowWheel != null) {
-				overflowWheel.advanceClock(currentTime);
-			}
-		}
 	}
 }
