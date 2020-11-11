@@ -1,5 +1,7 @@
 package org.apache.flink.walkthrough.common.entity;
 
+import com.google.common.base.Objects;
+
 /**
  * @author zhang lianhui
  * @date 2020/10/29 7:49 下午
@@ -47,5 +49,31 @@ public class SimpleMonitor implements Monitor {
 		this.delta = delta;
 	}
 
+	@Override
+	public String toString() {
+		return "SimpleMonitor{" +
+				"monitorId='" + monitorId + '\'' +
+				", cronExpression='" + cronExpression + '\'' +
+				", delta=" + delta +
+				'}';
+	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		SimpleMonitor that = (SimpleMonitor) o;
+		return Objects.equal(monitorId, that.monitorId) &&
+				Objects.equal(cronExpression, that.cronExpression) &&
+				Objects.equal(delta, that.delta);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(monitorId, cronExpression, delta);
+	}
 }

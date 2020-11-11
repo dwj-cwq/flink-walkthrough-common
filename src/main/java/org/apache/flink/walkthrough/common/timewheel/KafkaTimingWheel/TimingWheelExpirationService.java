@@ -1,9 +1,12 @@
 package org.apache.flink.walkthrough.common.timewheel.KafkaTimingWheel;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * @author zhang lianhui
  * @date 2020/11/10 4:42 下午
  */
+@Slf4j
 public class TimingWheelExpirationService {
 	private final Timer timer;
 	private ExpiredOperationReaper reaper;
@@ -13,7 +16,9 @@ public class TimingWheelExpirationService {
 	}
 
 	public void start() {
+		log.info("expired operation reaper thread started");
 		reaper = new ExpiredOperationReaper(timer);
+		reaper.setDaemon(true);
 		reaper.start();
 	}
 

@@ -44,6 +44,7 @@ import static org.apache.flink.walkthrough.common.timewheel.KafkaTimingWheel.Tim
 public class SystemTimer extends Timer {
 	private static final long DEFAULT_TICK_MS = 1;
 	private static final int DEFAULT_WHEEL_SIZE = 20;
+	private static final long serialVersionUID = 2878334936596351118L;
 	private final String executorName;
 	private final long tickMs;
 	private final int wheelSize;
@@ -72,6 +73,10 @@ public class SystemTimer extends Timer {
 
 	public SystemTimer() {
 		this("default_system_timer");
+	}
+
+	public SystemTimer(String executorName, long tickMs, int wheelSize) {
+		this(executorName, tickMs, wheelSize, TimeUtil.hiResClockMs());
 	}
 
 	public SystemTimer(String executorName) {

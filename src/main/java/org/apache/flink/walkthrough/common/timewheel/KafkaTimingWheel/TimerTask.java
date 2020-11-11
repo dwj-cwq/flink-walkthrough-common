@@ -10,7 +10,7 @@ import static org.apache.flink.walkthrough.common.timewheel.KafkaTimingWheel.Tim
  */
 public abstract class TimerTask implements Runnable {
 	// timestamp in millisecond
-	private long delayMs;
+	protected long delayMs;
 
 	private TimerTaskEntry timerTaskEntry;
 

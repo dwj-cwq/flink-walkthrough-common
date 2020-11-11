@@ -15,7 +15,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 @Slf4j
 public class TestTask extends TimerTask {
-	private final long delayMs;
 	private final int id;
 	private final CountDownLatch latch;
 	private final List<Integer> output;

@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 
-import static org.junit.Assert.*;
-
 /**
  * @author zhang lianhui
  * @date 2020/11/10 4:56 下午

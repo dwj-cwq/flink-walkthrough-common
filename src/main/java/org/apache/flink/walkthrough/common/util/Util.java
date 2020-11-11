@@ -8,10 +8,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import lombok.extern.slf4j.Slf4j;
 
+import org.apache.flink.walkthrough.common.timewheel.CronExpression;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -167,5 +170,18 @@ public class Util {
 		n |= n >>> 8;
 		n |= n >>> 16;
 		return (n < 0) ? 1 : (n >= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;
+	}
+
+	public static CronExpression parseCron(String cronExpression) {
+		try {
+			return new CronExpression(cronExpression);
+		} catch (ParseException pe) {
+			log.error(
+					"parse cron exception, cron {}, error message: {}",
+					cronExpression,
+					pe.getMessage(),
+					pe);
+		}
+		return null;
 	}
 }
