@@ -199,7 +199,7 @@ public class EngineDemo8 {
 							final String key = element.f0;
 							final List<Double> records = element.f1;
 							MedianFinder medianFinder = new MedianFinder();
-							records.forEach(r -> medianFinder.addNum(r));
+							records.forEach(medianFinder::addNum);
 							final double median = medianFinder.getMedian();
 							records.sort(Double::compareTo);
 							log.info(String.format(
