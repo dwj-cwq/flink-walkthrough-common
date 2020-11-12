@@ -15,7 +15,6 @@ import org.apache.flink.walkthrough.common.util.Util;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author zhang lianhui
@@ -26,7 +25,7 @@ public class CronTask extends TimerTask implements Serializable {
 	private static final long serialVersionUID = 3380958011711529982L;
 	private final String id;
 	private final CronExpression cronExpression;
-	private final AtomicBoolean cancel = new AtomicBoolean(false);
+	private volatile boolean cancel = false;
 	private final TaskManager taskManager = TaskManagerFactory.getTaskManager();
 	private final LinkedBlockingDeque<Rule> queue;
 	private final Monitor monitor;
@@ -47,7 +46,7 @@ public class CronTask extends TimerTask implements Serializable {
 	}
 
 	public boolean isCancel() {
-		return cancel.get();
+		return cancel;
 	}
 
 	public String getId() {
@@ -56,9 +55,8 @@ public class CronTask extends TimerTask implements Serializable {
 
 	@Override
 	public void cancel() {
-		if (this.cancel.compareAndSet(false, true)) {
-			super.cancel();
-		}
+		cancel = true;
+		super.cancel();
 	}
 
 	public void updateDelayMs() {
@@ -74,7 +72,7 @@ public class CronTask extends TimerTask implements Serializable {
 
 	@Override
 	public void run() {
-		log.info("cron task run");
+		// log.info("cron task run");
 		// 生成 rule
 		queue.addLast(new Rule(
 				monitor.getMonitorId(),

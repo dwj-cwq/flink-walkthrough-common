@@ -30,6 +30,5 @@ public class MonitorJob implements Job {
 				monitor.getCronExpression(),
 				monitor.getDelta(),
 				System.currentTimeMillis()));
-		log.info("deque size: " + deque.size());
 	}
 }

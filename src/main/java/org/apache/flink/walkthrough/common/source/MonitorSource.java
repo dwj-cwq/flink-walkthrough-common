@@ -15,6 +15,6 @@ public class MonitorSource extends FromIteratorFunction<Rule> implements Seriali
 	private static final long serialVersionUID = -6560586535485671809L;
 
 	public MonitorSource() {
-		super(new MonitorSourceIterator());
+		super(new MonitorSourceIterator().init());
 	}
 }

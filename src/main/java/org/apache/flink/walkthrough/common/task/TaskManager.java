@@ -63,7 +63,7 @@ public class TaskManager implements TaskManagerOperation<CronTask, String>, Seri
 		}
 		// 添加任务到时间轮
 		timer.add(task);
-		log.info("timing wheel size: {}, new task: {} ", timer.getSize(), task);
+		// log.info("timing wheel size: {}, new task: {} ", timer.getSize(), task);
 		return task;
 	}
 

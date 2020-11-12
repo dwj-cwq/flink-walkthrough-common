@@ -19,8 +19,7 @@ import java.util.concurrent.LinkedBlockingDeque;
  */
 public class MonitorSourceIterator implements Iterator<Rule>, Serializable {
 	private static final long serialVersionUID = 8381054071358505226L;
-	private static LinkedBlockingDeque<Rule> linkedBlockingDeque = new LinkedBlockingDeque<>(
-			1000 * 1000);
+	private static LinkedBlockingDeque<Rule> linkedBlockingDeque = new LinkedBlockingDeque<>();
 
 	@Override
 	public boolean hasNext() {
@@ -42,7 +41,7 @@ public class MonitorSourceIterator implements Iterator<Rule>, Serializable {
 		}
 	}
 
-	static {
+	public MonitorSourceIterator init() {
 		final List<Monitor> allMonitors = findAllMonitors();
 		for (Monitor monitor : allMonitors) {
 			try {
@@ -51,23 +50,25 @@ public class MonitorSourceIterator implements Iterator<Rule>, Serializable {
 				e.printStackTrace();
 			}
 		}
+		return this;
 	}
 
-	private static List<Monitor> findAllMonitors() {
-		List<Monitor> monitors = new ArrayList<>();
-		monitors.add(new SimpleMonitor("monitor_a", "0/20 * * * * ? ", 60 * 1000L));
-		monitors.add(new SimpleMonitor("monitor_b", "0 0/1 * * * ? ", 10 * 1000L));
-		return monitors;
-	}
-//
+	//
 //	private static List<Monitor> findAllMonitors() {
 //		List<Monitor> monitors = new ArrayList<>();
-//		for (int i = 0; i < 100000; i++) {
-//			int seconds = 5 * ((i % 11) + 1);
-//			String cronExpression = String.format("0/%d * * * * ? ", seconds);
-//			monitors.add(new SimpleMonitor("monitor_" + i, cronExpression));
-//		}
+//		monitors.add(new SimpleMonitor("monitor_a", "0/20 * * * * ? ", 60 * 1000L));
+//		monitors.add(new SimpleMonitor("monitor_b", "0 0/1 * * * ? ", 10 * 1000L));
 //		return monitors;
 //	}
+
+	private List<Monitor> findAllMonitors() {
+		List<Monitor> monitors = new ArrayList<>();
+		for (int i = 0; i < 10_0000; i++) {
+			int seconds = 5 * ((i % 11) + 1);
+			String cronExpression = String.format("0/%d * * * * ? ", seconds);
+			monitors.add(new SimpleMonitor("monitor_" + i, cronExpression, 60 * 1000L));
+		}
+		return monitors;
+	}
 
 }

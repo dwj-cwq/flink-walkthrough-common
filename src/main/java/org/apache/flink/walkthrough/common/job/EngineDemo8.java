@@ -50,7 +50,7 @@ public class EngineDemo8 {
 		// 使用 event time
 		env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 		// kafka topic
-		final String topic = "huidemo3";
+		final String topic = "huidemo4";
 
 		// kafka properties
 		Properties properties = new Properties();

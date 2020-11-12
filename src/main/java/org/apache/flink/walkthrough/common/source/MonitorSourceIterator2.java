@@ -19,8 +19,7 @@ import java.util.concurrent.LinkedBlockingDeque;
  */
 public class MonitorSourceIterator2 implements Iterator<Rule>, Serializable {
 	private static final long serialVersionUID = -3326297488411505913L;
-	private static LinkedBlockingDeque<Rule> deque = new LinkedBlockingDeque<>(
-			1000 * 1000);
+	private static LinkedBlockingDeque<Rule> deque = new LinkedBlockingDeque<>();
 	private final transient TaskManager taskManager = TaskManagerFactory.getTaskManager();
 
 	@Override
@@ -65,10 +64,10 @@ public class MonitorSourceIterator2 implements Iterator<Rule>, Serializable {
 
 	private List<Monitor> findAllMonitors() {
 		List<Monitor> monitors = new ArrayList<>();
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 10_0000; i++) {
 			int seconds = 5 * ((i % 11) + 1);
 			String cronExpression = String.format("0/%d * * * * ? ", seconds);
-			monitors.add(new SimpleMonitor("monitor_" + i, cronExpression, 60 * 1000L));
+			monitors.add(new SimpleMonitor("monitor_" + i, cronExpression, 2*60 * 1000L));
 		}
 		return monitors;
 	}

@@ -7,8 +7,9 @@ import org.apache.flink.walkthrough.common.util.TimeUtil;
 
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
@@ -103,8 +104,21 @@ public class SystemTimer extends Timer {
 		);
 		this.threadFactory = new ThreadFactoryBuilder()
 				.setNameFormat("timing wheel thread-" + executorName)
+				.setUncaughtExceptionHandler((t, e) -> log.error(
+						t.getName() + " error message: {}",
+						e.getMessage(),
+						e))
 				.build();
-		this.executorService = Executors.newFixedThreadPool(1, this.threadFactory);
+		ThreadPoolExecutor executor = new ThreadPoolExecutor(
+				2,
+				10,
+				60,
+				TimeUnit.SECONDS,
+				new LinkedBlockingDeque<>(),
+				threadFactory);
+		executor.allowCoreThreadTimeOut(true);
+		this.executorService = executor;
+
 	}
 
 	public String getExecutorName() {
