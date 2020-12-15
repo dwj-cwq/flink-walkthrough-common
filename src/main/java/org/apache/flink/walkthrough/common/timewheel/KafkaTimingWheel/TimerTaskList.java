@@ -2,7 +2,6 @@ package org.apache.flink.walkthrough.common.timewheel.KafkaTimingWheel;
 
 import com.google.common.base.Objects;
 
-import lombok.extern.slf4j.Slf4j;
 
 import org.apache.flink.walkthrough.common.util.TimeUtil;
 
@@ -21,7 +20,6 @@ import static java.lang.Long.*;
  * @author kafka
  * @date 2020/11/9 10:47 上午
  */
-@Slf4j
 public class TimerTaskList implements Delayed {
 	/**
 	 * 虚拟节点
@@ -142,12 +140,9 @@ public class TimerTaskList implements Delayed {
 	 */
 	@Override
 	public long getDelay(TimeUnit timeUnit) {
-
-		final long convert = timeUnit.convert(
+		return timeUnit.convert(
 				max(getExpiration() - TimeUtil.hiResClockMs(), 0),
 				TimeUnit.MILLISECONDS);
-		// log.info("current expiration: {}, get delay: {}", getExpiration(), convert);
-		return convert;
 	}
 
 	@Override

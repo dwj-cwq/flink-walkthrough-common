@@ -37,7 +37,7 @@ public class TimingWheelExpirationServiceTest {
 		List<TestTask> tasks = new ArrayList<>();
 		List<Integer> ids = new ArrayList<>();
 		List<CountDownLatch> latches = new ArrayList<>();
-		for (int i = 1; i < 120; i++) {
+		for (int i = 1; i < 2; i++) {
 			CountDownLatch latch = new CountDownLatch(1);
 			tasks.add(new TestTask(i * 1000, i, latch, output));
 			ids.add(i);

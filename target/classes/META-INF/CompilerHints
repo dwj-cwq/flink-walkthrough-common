@@ -1,0 +1,16 @@
+dontinline,*.*_all_jmhStub
+dontinline,*.*_avgt_jmhStub
+dontinline,*.*_sample_jmhStub
+dontinline,*.*_ss_jmhStub
+dontinline,*.*_thrpt_jmhStub
+inline,test/benckmark/BenchMark.blackHole
+inline,test/benckmark/BenchMark.doNothing
+inline,test/benckmark/BenchMark.foldedLog
+inline,test/benckmark/BenchMark.init
+inline,test/benckmark/BenchMark.log
+inline,test/benckmark/BenchMark.objectCreation
+inline,test/benckmark/BenchMark.pillarsOfCreation
+inline,test/benckmark/BenchMarkDemo1$ExecutionPlan.setUp
+inline,test/benckmark/BenchMarkDemo1.benchMurmur3_128
+inline,test/benckmark/BenchMarkDemo2.testStringAdd
+inline,test/benckmark/BenchMarkDemo2.testStringBuilderAdd

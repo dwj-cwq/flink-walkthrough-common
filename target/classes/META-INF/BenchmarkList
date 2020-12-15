@@ -1,0 +1,10 @@
+JMH S 29 test.benckmark.BenchMarkDemo2 S 61 test.benckmark.generated.BenchMarkDemo2_testStringAdd_jmhTest S 13 testStringAdd S 10 Throughput I 1 8 A 1 1 1 E I 1 3 E E I 2 10 T 3 5 s E I 1 2 E E E E E E U 12 MILLISECONDS E E 
+JMH S 24 test.benckmark.BenchMark S 52 test.benckmark.generated.BenchMark_blackHole_jmhTest S 9 blackHole S 11 AverageTime E A 1 1 1 E E E E E E E E E E E E E E U 11 NANOSECONDS E E 
+JMH S 24 test.benckmark.BenchMark S 52 test.benckmark.generated.BenchMark_foldedLog_jmhTest S 9 foldedLog S 10 Throughput E A 1 1 1 E E E E E E E E E E E E E E E E E 
+JMH S 29 test.benckmark.BenchMarkDemo2 S 68 test.benckmark.generated.BenchMarkDemo2_testStringBuilderAdd_jmhTest S 20 testStringBuilderAdd S 10 Throughput I 1 8 A 1 1 1 E I 1 3 E E I 2 10 T 3 5 s E I 1 2 E E E E E E U 12 MILLISECONDS E E 
+JMH S 24 test.benckmark.BenchMark S 60 test.benckmark.generated.BenchMark_pillarsOfCreation_jmhTest S 17 pillarsOfCreation S 11 AverageTime E A 1 1 1 E E E E E E E E E E E E E E U 11 NANOSECONDS E E 
+JMH S 24 test.benckmark.BenchMark S 46 test.benckmark.generated.BenchMark_log_jmhTest S 3 log S 10 Throughput E A 1 1 1 E E E E E E E E E E E E E E E E E 
+JMH S 24 test.benckmark.BenchMark S 57 test.benckmark.generated.BenchMark_objectCreation_jmhTest S 14 objectCreation S 11 AverageTime E A 1 1 1 E E E E E E E E E E E E E E U 11 NANOSECONDS E E 
+JMH S 24 test.benckmark.BenchMark S 47 test.benckmark.generated.BenchMark_init_jmhTest S 4 init S 10 Throughput E A 1 1 1 E E E E E E E I 1 1 I 1 1 E E E E E E E E 
+JMH S 24 test.benckmark.BenchMark S 52 test.benckmark.generated.BenchMark_doNothing_jmhTest S 9 doNothing S 11 AverageTime E A 1 1 1 E E E E E E E E E E E E E E U 11 NANOSECONDS E E 
+JMH S 29 test.benckmark.BenchMarkDemo1 S 64 test.benckmark.generated.BenchMarkDemo1_benchMurmur3_128_jmhTest S 16 benchMurmur3_128 S 10 Throughput E A 1 1 1 E E E E E E E I 1 1 I 1 1 E E E E M 1 10 iterations 5 3 100 3 200 3 300 3 500 4 1000 E E E 

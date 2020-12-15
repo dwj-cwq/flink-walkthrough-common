@@ -32,8 +32,8 @@ public class MonitorSourceIterator2 implements Iterator<Rule>, Serializable {
 		for (Monitor monitor : allMonitors) {
 			final CronTask cronTask = new CronTask(
 					monitor.getMonitorId(),
-					deque,
-					monitor);
+					monitor.getCronExpression(),
+					deque);
 			taskManager.add(cronTask);
 		}
 		return this;
@@ -42,11 +42,12 @@ public class MonitorSourceIterator2 implements Iterator<Rule>, Serializable {
 	@Override
 	public Rule next() {
 		while (true) {
+			System.out.printf("thread: %s", Thread.currentThread().getName());
 			if (!deque.isEmpty()) {
 				return deque.pollFirst();
 			} else {
 				try {
-					Thread.sleep(1000);
+					Thread.sleep(10);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -55,21 +56,21 @@ public class MonitorSourceIterator2 implements Iterator<Rule>, Serializable {
 	}
 
 
-//	private List<Monitor> findAllMonitors() {
-//		List<Monitor> monitors = new ArrayList<>();
-//		monitors.add(new SimpleMonitor("monitor_a", "0/20 * * * * ? ", 60 * 1000L));
-//		monitors.add(new SimpleMonitor("monitor_b", "0 0/1 * * * ? ", 10 * 1000L));
-//		return monitors;
-//	}
-
 	private List<Monitor> findAllMonitors() {
 		List<Monitor> monitors = new ArrayList<>();
-		for (int i = 0; i < 10_0000; i++) {
-			int seconds = 5 * ((i % 11) + 1);
-			String cronExpression = String.format("0/%d * * * * ? ", seconds);
-			monitors.add(new SimpleMonitor("monitor_" + i, cronExpression, 2*60 * 1000L));
-		}
+		monitors.add(new SimpleMonitor("monitor_a", "0/20 * * * * ? "));
+		monitors.add(new SimpleMonitor("monitor_b", "0 0/1 * * * ? "));
 		return monitors;
 	}
+
+//	private List<Monitor> findAllMonitors() {
+//		List<Monitor> monitors = new ArrayList<>();
+//		for (int i = 0; i < 50_0000; i++) {
+//			int seconds = 5 * ((i % 11) + 1);
+//			String cronExpression = String.format("0/%d * * * * ? ", seconds);
+//			monitors.add(new SimpleMonitor("monitor_" + i, cronExpression));
+//		}
+//		return monitors;
+//	}
 
 }

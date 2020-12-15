@@ -1,10 +1,12 @@
 package org.apache.flink.walkthrough.common.task;
 
-import lombok.extern.slf4j.Slf4j;
 
 import org.apache.flink.walkthrough.common.timewheel.KafkaTimingWheel.SystemTimer;
 import org.apache.flink.walkthrough.common.timewheel.KafkaTimingWheel.Timer;
 import org.apache.flink.walkthrough.common.timewheel.KafkaTimingWheel.TimingWheelExpirationService;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -14,8 +16,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author zhang lianhui
  * @date 2020/11/11 11:13 上午
  */
-@Slf4j
 public class TaskManager implements TaskManagerOperation<CronTask, String>, Serializable {
+	private static final Logger log = LoggerFactory.getLogger(TaskManager.class);
+
 	private static final long serialVersionUID = 6125129130305409210L;
 	private static final long TICK_MS = 1;
 	private static final int WHEEL_SIZE = 60;

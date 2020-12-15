@@ -1,13 +1,15 @@
 package org.apache.flink.walkthrough.common.timewheel.KafkaTimingWheel;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author zhang lianhui
  * @date 2020/11/10 4:42 下午
  */
-@Slf4j
 public class TimingWheelExpirationService {
+	private static final Logger log = LoggerFactory.getLogger(TimingWheelExpirationService.class);
+
 	private final Timer timer;
 	private ExpiredOperationReaper reaper;
 

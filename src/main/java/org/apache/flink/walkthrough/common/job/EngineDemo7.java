@@ -90,7 +90,7 @@ public class EngineDemo7 {
 		final DataStream<Record> recordsStream = kafkaSource.map(new MapToRecord());
 
 		// monitor source
-		final DataStream<Rule> ruleStream = env.addSource(new MonitorSource());
+		final DataStream<Rule> ruleStream = env.addSource(new MonitorSource()).setParallelism(2);
 
 		// 生成水印
 

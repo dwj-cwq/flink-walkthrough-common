@@ -9,27 +9,19 @@ import com.google.common.base.Objects;
 public class SimpleMonitor implements Monitor {
 	private String monitorId;
 	private String cronExpression;
-	private Long delta;
 
 	public SimpleMonitor() {
 
 	}
 
-	public SimpleMonitor(String monitorId, String cronExpression, Long delta) {
+	public SimpleMonitor(String monitorId, String cronExpression) {
 		this.monitorId = monitorId;
 		this.cronExpression = cronExpression;
-		this.delta = delta;
 	}
 
 	@Override
 	public String getMonitorId() {
 		return this.monitorId;
-	}
-
-
-	@Override
-	public Long getDelta() {
-		return this.delta;
 	}
 
 	@Override
@@ -45,16 +37,11 @@ public class SimpleMonitor implements Monitor {
 		this.cronExpression = cronExpression;
 	}
 
-	public void setDelta(Long delta) {
-		this.delta = delta;
-	}
-
 	@Override
 	public String toString() {
 		return "SimpleMonitor{" +
 				"monitorId='" + monitorId + '\'' +
 				", cronExpression='" + cronExpression + '\'' +
-				", delta=" + delta +
 				'}';
 	}
 
@@ -68,12 +55,11 @@ public class SimpleMonitor implements Monitor {
 		}
 		SimpleMonitor that = (SimpleMonitor) o;
 		return Objects.equal(monitorId, that.monitorId) &&
-				Objects.equal(cronExpression, that.cronExpression) &&
-				Objects.equal(delta, that.delta);
+				Objects.equal(cronExpression, that.cronExpression);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(monitorId, cronExpression, delta);
+		return Objects.hashCode(monitorId, cronExpression);
 	}
 }

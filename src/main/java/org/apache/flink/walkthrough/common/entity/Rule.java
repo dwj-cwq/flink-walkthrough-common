@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Rule extends SimpleMonitor {
 	private String monitorId;
-	private String cronExpression;
 	private Long delta;
 	private Long timestamp;
 

@@ -1,6 +1,8 @@
 package org.apache.flink.walkthrough.common.timewheel.KafkaTimingWheel;
 
-import lombok.extern.slf4j.Slf4j;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -8,8 +10,8 @@ import java.util.concurrent.CountDownLatch;
  * @author zhang lianhui
  * @date 2020/11/10 3:06 下午
  */
-@Slf4j
 public abstract class ShutdownAbleThread extends Thread {
+	private static final Logger log = LoggerFactory.getLogger(ShutdownAbleThread.class);
 	private CountDownLatch shutdownInitiated = new CountDownLatch(1);
 	private CountDownLatch shutdownCompleted = new CountDownLatch(1);
 	private String name;

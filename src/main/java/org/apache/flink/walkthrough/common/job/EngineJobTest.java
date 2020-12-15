@@ -27,8 +27,8 @@ public class EngineJobTest {
 		env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
 		List<Monitor> monitors = Lists.newArrayList(
-				new SimpleMonitor("monitor_a", "0 0/1 * * * ? *", 60 * 1000L),
-				new SimpleMonitor("monitor_b", "0/10 * * * * ? ", 20 * 1000L));
+				new SimpleMonitor("monitor_a", "0 0/1 * * * ? *"),
+				new SimpleMonitor("monitor_b", "0/10 * * * * ? "));
 		final DataStreamSource<Monitor> monitorSource = env.fromCollection(monitors);
 		final DataStream<Record> processStream = monitorSource
 				.keyBy(Monitor::getMonitorId)

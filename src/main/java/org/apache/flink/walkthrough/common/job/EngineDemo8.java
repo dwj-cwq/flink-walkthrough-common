@@ -1,7 +1,5 @@
 package org.apache.flink.walkthrough.common.job;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.apache.commons.compress.utils.Lists;
 
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
@@ -32,6 +30,9 @@ import org.apache.flink.walkthrough.common.source.MonitorSource2;
 import org.apache.flink.walkthrough.common.util.TimeUtil;
 import org.apache.flink.walkthrough.common.util.Util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -41,12 +42,11 @@ import java.util.Properties;
  * @author zhang lianhui
  * @date 2020/11/3 4:45 下午
  */
-@Slf4j
 public class EngineDemo8 {
+	protected static final Logger log = LoggerFactory.getLogger(EngineDemo8.class);
+
 	public static void main(String[] args) throws Exception {
 		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-		// 设置默认并行度
-		env.setParallelism(1);
 		// 使用 event time
 		env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 		// kafka topic
@@ -83,7 +83,7 @@ public class EngineDemo8 {
 		final DataStream<Record> recordsStream = kafkaSource.map(new MapToRecord());
 
 		// monitor source
-		final DataStream<Rule> ruleStream = env.addSource(new MonitorSource2());
+		final DataStream<Rule> ruleStream = env.addSource(new MonitorSource2()).setParallelism(2);
 
 
 		// 生成水印

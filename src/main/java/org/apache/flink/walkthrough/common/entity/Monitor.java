@@ -13,6 +13,4 @@ public interface Monitor {
 		return "0 * * * * ?";   // 默认每分钟 0s 触发
 	}
 
-	// 限定处理数据时间的范围
-	Long getDelta();
 }

@@ -9,7 +9,7 @@
         <module name="flink-walkthrough-common" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
+    <bytecodeTargetLevel target="8">
       <module name="flink-walkthrough-common" target="1.8" />
     </bytecodeTargetLevel>
   </component>

@@ -27,8 +27,7 @@ public class MonitorJob implements Job {
 		final Monitor monitor = (Monitor) jobDetail.getJobDataMap().get(JobUtil.MONITOR);
 		deque.addLast(new Rule(
 				monitor.getMonitorId(),
-				monitor.getCronExpression(),
-				monitor.getDelta(),
+				60 * 1000L,
 				System.currentTimeMillis()));
 	}
 }

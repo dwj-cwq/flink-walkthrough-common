@@ -6,11 +6,13 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.lang3.time.DateFormatUtils;
 
-import org.apache.flink.walkthrough.common.entity.Monitor;
 import org.apache.flink.walkthrough.common.entity.Rule;
 import org.apache.flink.walkthrough.common.timewheel.CronExpression;
 import org.apache.flink.walkthrough.common.timewheel.KafkaTimingWheel.TimerTask;
-import org.apache.flink.walkthrough.common.util.Util;
+import org.apache.flink.walkthrough.common.util.TimeUtil;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -20,29 +22,22 @@ import java.util.concurrent.LinkedBlockingDeque;
  * @author zhang lianhui
  * @date 2020/11/11 10:42 上午
  */
-@Slf4j
 public class CronTask extends TimerTask implements Serializable {
 	private static final long serialVersionUID = 3380958011711529982L;
+	private static final Logger log = LoggerFactory.getLogger(CronTask.class);
 	private final String id;
-	private final CronExpression cronExpression;
+	private final String cronExpression;
 	private volatile boolean cancel = false;
-	private final TaskManager taskManager = TaskManagerFactory.getTaskManager();
 	private final LinkedBlockingDeque<Rule> queue;
-	private final Monitor monitor;
-	private Date lastExecuteDate;
+	private long lastExecuteTimestamp = -1;
 
 	public CronTask(
 			String id,
-			LinkedBlockingDeque<Rule> queue,
-			Monitor monitor) {
+			String cronExpress,
+			LinkedBlockingDeque<Rule> queue) {
 		this.id = id;
-		this.cronExpression = Util.parseCron(monitor.getCronExpression());
+		this.cronExpression = cronExpress;
 		this.queue = queue;
-		this.monitor = monitor;
-	}
-
-	public CronExpression getCronExpression() {
-		return cronExpression;
 	}
 
 	public boolean isCancel() {
@@ -60,29 +55,38 @@ public class CronTask extends TimerTask implements Serializable {
 	}
 
 	public void updateDelayMs() {
-		if (lastExecuteDate == null) {
-			lastExecuteDate = new Date();
+		if (lastExecuteTimestamp == -1) {
+			lastExecuteTimestamp = System.currentTimeMillis();
 		}
-		final Date nextExecuteDate = cronExpression.getNextValidTimeAfter(lastExecuteDate);
-		final long nextTime = nextExecuteDate.toInstant().toEpochMilli();
+
+		final Date lastExecDate = timestampToDate(lastExecuteTimestamp);
+		final CronExpression expression = CronCacheFactory
+				.getCronCache()
+				.get(this.cronExpression);
+		final Date nextExecuteDate = expression.getNextValidTimeAfter(lastExecDate);
+		final long nextTime = dateToTimestamp(nextExecuteDate);
 		final long delay = nextTime - System.currentTimeMillis();
 		this.setDelayMs(delay);
-		lastExecuteDate = nextExecuteDate;
+		lastExecuteTimestamp = nextTime;
 	}
 
 	@Override
 	public void run() {
 		// log.info("cron task run");
 		// 生成 rule
-		queue.addLast(new Rule(
-				monitor.getMonitorId(),
-				monitor.getCronExpression(),
-				monitor.getDelta(),
-				System.currentTimeMillis()));
-		if (!isCancel()) {
-			taskManager.add(this);
+		produceMonitorTriggerRecord(this);
+	}
+
+	public static void produceMonitorTriggerRecord(CronTask task) {
+		Rule rule = new Rule(
+				task.getId(),
+				600L,
+				System.currentTimeMillis());
+		task.queue.addLast(rule);
+		if (!task.isCancel()) {
+			TaskManagerFactory.getTaskManager().add(task);
 		} else {
-			taskManager.delete(id);
+			TaskManagerFactory.getTaskManager().delete(task.getId());
 		}
 	}
 
@@ -92,8 +96,16 @@ public class CronTask extends TimerTask implements Serializable {
 				"id='" + id + '\'' +
 				", cronExpression=" + cronExpression +
 				", cancel=" + cancel +
-				", lastExecuteDate=" + getLastExecuteDate(lastExecuteDate) +
+				", lastExecuteDate=" + TimeUtil.epochMilliFormat(lastExecuteTimestamp) +
 				'}';
+	}
+
+	public static Date timestampToDate(long timestamp) {
+		return new Date(timestamp);
+	}
+
+	public static long dateToTimestamp(Date date) {
+		return date.toInstant().toEpochMilli();
 	}
 
 	public String getLastExecuteDate(Date lastExecuteDate) {
@@ -115,12 +127,11 @@ public class CronTask extends TimerTask implements Serializable {
 		return Objects.equal(id, cronTask.id) &&
 				Objects.equal(cronExpression, cronTask.cronExpression) &&
 				Objects.equal(cancel, cronTask.cancel) &&
-				Objects.equal(monitor, cronTask.monitor) &&
-				Objects.equal(lastExecuteDate, cronTask.lastExecuteDate);
+				Objects.equal(lastExecuteTimestamp, cronTask.lastExecuteTimestamp);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(id, cronExpression, cancel, monitor, lastExecuteDate);
+		return Objects.hashCode(id, cronExpression, cancel, lastExecuteTimestamp);
 	}
 }

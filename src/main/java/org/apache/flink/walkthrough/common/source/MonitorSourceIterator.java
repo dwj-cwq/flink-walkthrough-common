@@ -63,10 +63,10 @@ public class MonitorSourceIterator implements Iterator<Rule>, Serializable {
 
 	private List<Monitor> findAllMonitors() {
 		List<Monitor> monitors = new ArrayList<>();
-		for (int i = 0; i < 10_0000; i++) {
+		for (int i = 0; i < 20_0000; i++) {
 			int seconds = 5 * ((i % 11) + 1);
 			String cronExpression = String.format("0/%d * * * * ? ", seconds);
-			monitors.add(new SimpleMonitor("monitor_" + i, cronExpression, 60 * 1000L));
+			monitors.add(new SimpleMonitor("monitor_" + i, cronExpression));
 		}
 		return monitors;
 	}

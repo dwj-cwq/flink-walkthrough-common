@@ -1,9 +1,11 @@
 package org.apache.flink.walkthrough.common.timewheel.KafkaTimingWheel;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import lombok.extern.slf4j.Slf4j;
 
 import org.apache.flink.walkthrough.common.util.TimeUtil;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.ExecutorService;
@@ -41,8 +43,8 @@ import static org.apache.flink.walkthrough.common.timewheel.KafkaTimingWheel.Tim
  * @author kafka
  * @date 2020/11/9 3:58 下午
  */
-@Slf4j
 public class SystemTimer extends Timer {
+	private static final Logger log = LoggerFactory.getLogger(SystemTimer.class);
 	private static final long DEFAULT_TICK_MS = 1;
 	private static final int DEFAULT_WHEEL_SIZE = 20;
 	private static final long serialVersionUID = 2878334936596351118L;
