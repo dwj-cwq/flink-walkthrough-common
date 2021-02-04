@@ -14,15 +14,15 @@ import org.apache.flink.util.Collector;
  * @author zhang lianhui
  * @date 2020/10/24 11:16 上午
  */
-public class CountWindowAverage extends RichFlatMapFunction<Tuple2<Long, Long>, Tuple2<Long, Long>> {
+public class CountWindowAverage extends RichFlatMapFunction<Tuple2<Long, Long>, Tuple2<Long, Double>> {
 	private transient ValueState<Tuple2<Long, Long>> sum;
 	private IntCounter counter = new IntCounter();
 
 	@Override
 	public void flatMap(
 			Tuple2<Long, Long> input,
-			Collector<Tuple2<Long, Long>> out) throws Exception {
-		final Tuple2<Long, Long> currentValue = sum.value();
+			Collector<Tuple2<Long, Double>> out) throws Exception {
+		final Tuple2<Long, Long> currentValue = sum.value() == null ? new Tuple2<>(0L, 0L) : sum.value();
 
 		currentValue.f0 += 1;
 		currentValue.f1 += input.f1;
@@ -30,7 +30,7 @@ public class CountWindowAverage extends RichFlatMapFunction<Tuple2<Long, Long>, 
 		sum.update(currentValue);
 
 		if (currentValue.f0 >= 2) {
-			out.collect(new Tuple2<>(input.f0, currentValue.f1 / currentValue.f0));
+			out.collect(new Tuple2<>(input.f0, (double)currentValue.f1 / currentValue.f0));
 			sum.clear();
 			this.counter.add(1);
 		}
